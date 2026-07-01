@@ -216,7 +216,7 @@ int minusOne(void) {
 int bitMask(int highbit, int lowbit) {
   int ones = ~0;
   int highMask = ones << highbit << 1; 
-  int lowMask = ones << lowbit
+  int lowMask = ones << lowbit;
   return ~highMask & lowMask;
 }
 
