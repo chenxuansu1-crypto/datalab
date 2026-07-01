@@ -186,9 +186,9 @@ int sign(int x) {
  *   Rating: 2
  */
 int anyEvenBit(int x) {
-  int mask
+  int mask = 0x55;
   mask = mask | (mask << 8);
-  mask = mask | (mask << 31)；
+  mask = mask | (mask << 31);
   return !!(x & mask);
 }
 
