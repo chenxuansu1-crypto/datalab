@@ -175,8 +175,9 @@ NOTES:
  *  Rating: 2
  */
 int sign(int x) {
-    return 2;
+    return (!! x) | (x >> 31);
 }
+
 /* 
  * anyEvenBit - return 1 if any even-numbered bit in word set to 1
  *   Examples anyEvenBit(0xA) = 0, anyEvenBit(0xE) = 1
@@ -185,17 +186,23 @@ int sign(int x) {
  *   Rating: 2
  */
 int anyEvenBit(int x) {
-  return 2;
+  int mask
+  mask = mask | (mask << 8);
+  mask = mask | (mask << 31)
+  return !!(x & mask);
 }
+
 /* 
  * minusOne - return a value of -1 
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 2
+
  *   Rating: 1
  */
 int minusOne(void) {
-  return 2;
+  return ~0;
 }
+
 /* 
  * bitMask - Generate a mask consisting of all 1's 
  *   lowbit and highbit
@@ -207,8 +214,14 @@ int minusOne(void) {
  *   Rating: 3
  */
 int bitMask(int highbit, int lowbit) {
-  return 2;
+  int all = ~0;
+  int low_mask = all << low;
+  int high_base = 1 << high;
+  int high_edge = high_base << 1;
+  int high_mask = high_edge + all;
+  return low_mask & high_mask;
 }
+
 /* 
  * getByte - Extract byte n from word x
  *   Bytes numbered from 0 (LSB) to 3 (MSB)
@@ -218,8 +231,9 @@ int bitMask(int highbit, int lowbit) {
  *   Rating: 2
  */
 int getByte(int x, int n) {
-  return 2;
+  return (x >> (n << 3)) & 0xFF;
 }
+
 /* 
  * absVal - absolute value of x
  *   Example: absVal(-1) = 1.
@@ -229,8 +243,10 @@ int getByte(int x, int n) {
  *   Rating: 4
  */
 int absVal(int x) {
-  return 2;
+  int mask = x >> 31;
+  return (x + mask ) ^ mask;
 }
+
 /*
  * bitCount - returns count of number of 1's in word
  *   Examples: bitCount(5) = 2, bitCount(7) = 3
@@ -239,8 +255,27 @@ int absVal(int x) {
  *   Rating: 4
  */
 int bitCount(int x) {
-  return 2;
+  int m1 = 0x55;
+  int m2 = 0x33; 
+  int m4 = 0x0f; 
+  int m8 = 0xff;
+
+  m1 = m1 | (m1 << 8);
+  m1 = m1 | (m1 << 16);
+  m2 = m2 | (m2 << 8);
+  m2 = m2 | (m2 << 16);
+  m4 = m4 | (m4 << 8);
+  m4 = m4 | (m4 << 16);
+  m8 = m8 | (m8 << 16);
+    
+  x = (x & m1) + ((x >> 1) & m1);
+  x = (x & m2) + ((x >> 2) & m2);
+  x = (x & m4) + ((x >> 4) & m4);
+  x = (x & m8) + ((x >> 8) & m8);
+  x = (x & 0xff) + ((x >> 16) & 0xff);
+  return x;
 }
+
 /* 
  * byteSwap - swaps the nth byte and the mth byte
  *  Examples: byteSwap(0x12345678, 1, 3) = 0x56341278
@@ -251,8 +286,14 @@ int bitCount(int x) {
  *  Rating: 2
  */
 int byteSwap(int x, int n, int m) {
-    return 2;
+  int ns = n << 3;
+  int ms = m << 3;
+  int bn = (x >> ns) & 0xFF;
+  int bm = (x >> ms) & 0xFF;
+  int mask = ~((0xFF << ns) | (0xFF << ms));
+  return (x & mask) | (bn << ms) | (bm << ns);
 }
+
 /* 
  * bang - Compute !x without using !
  *   Examples: bang(3) = 0, bang(0) = 1
@@ -261,8 +302,11 @@ int byteSwap(int x, int n, int m) {
  *   Rating: 4 
  */
 int bang(int x) {
-  return 2;
+  int neg_x = ~x + 1;
+  int or_result = x | neg_x;
+  return (or_result >> 31) + 1;
 }
+
 /* 
  * tmin - return minimum two's complement integer 
  *   Legal ops: ! ~ & ^ | + << >>
@@ -270,8 +314,9 @@ int bang(int x) {
  *   Rating: 1
  */
 int tmin(void) {
-  return 2;
+  return 1 << 31;
 }
+
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
  *   Example: isLessOrEqual(4,5) = 1.
@@ -280,7 +325,14 @@ int tmin(void) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+  int sx = x >> 31;
+  int sy = y >> 31;
+  int sign_diff = sx ^ sy;
+  int x_neg_y_pos = sx & (~sy);
+  int y_minus_x = y + (~x + 1);
+  int diff_neg = y_minus_x >> 31;
+  int same_sign_ok = (~sign_diff) & (~diff_neg);
+  return (x_neg_y_pos | same_sign_ok) & 1;
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -291,7 +343,9 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-    return 2;
+  int sign = x >> 31;
+  int bias = (1 << n) + ~0;
+  return (x + (sign & bias)) >> n;
 }
 /* 
  * negate - return -x 
@@ -301,7 +355,7 @@ int divpwr2(int x, int n) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+  return ~x + 1;
 }
 /* 
  * greatestBitPos - return a mask that marks the position of the
@@ -312,7 +366,13 @@ int negate(int x) {
  *   Rating: 4 
  */
 int greatestBitPos(int x) {
-  return 2;
+  int mask = x;
+  mask = mask | (mask >> 1);
+  mask = mask | (mask >> 2);
+  mask = mask | (mask >> 4);
+  mask = mask | (mask >> 8);
+  mask = mask | (mask >> 16);
+  return mask ^ (mask >> 1) ^ (mask & (1 << 31));
 }
 /* 
  * isPositive - return 1 if x > 0, return 0 otherwise 
@@ -322,5 +382,7 @@ int greatestBitPos(int x) {
  *   Rating: 3
  */
 int isPositive(int x) {
-  return 2;
+  int is_neg = x >> 31;
+  int is_zero = !x;
+  return !(is_neg | is_zero);
 }
