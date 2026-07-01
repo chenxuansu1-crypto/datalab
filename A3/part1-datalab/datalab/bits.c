@@ -188,7 +188,7 @@ int sign(int x) {
 int anyEvenBit(int x) {
   int mask
   mask = mask | (mask << 8);
-  mask = mask | (mask << 31)
+  mask = mask | (mask << 31)；
   return !!(x & mask);
 }
 
@@ -214,12 +214,10 @@ int minusOne(void) {
  *   Rating: 3
  */
 int bitMask(int highbit, int lowbit) {
-  int all = ~0;
-  int low_mask = all << low;
-  int high_base = 1 << high;
-  int high_edge = high_base << 1;
-  int high_mask = high_edge + all;
-  return low_mask & high_mask;
+  int ones = ~0;
+  int highMask = ones << highbit << 1; 
+  int lowMask = ones << lowbit
+  return ~highMask & lowMask;
 }
 
 /* 
