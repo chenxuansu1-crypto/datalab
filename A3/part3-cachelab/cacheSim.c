@@ -42,10 +42,31 @@ void printCache()
 	}
 }
 
+// part 2 
 u_int32_t read_fifo(u_int32_t address){
-	return 0;
+	u_int32_t result = 0;
+	int i;
+	for( i = 0; i < 4; i++){
+		u_int32_t current_addr = address + i;
+		fetch_block_to_cashes(current_addr)
+		unsigned int l1_set = getL1SetID(current_addr);
+		unsigned int l1_tag = getL1Tag(current_addr);
+		unsigned int offset = current_addr & 0xF;
+		unsigned char byte_val = 0;
+
+		int w;
+		for (w= 0; w < 2; w ++ ){
+			if ( L1_cache[l1_set][w]. valid && L1_cache[l1_set][w].tag == l1_tag){
+				byte_val = L1_cache[l1_set][w].data[offset];
+				break;
+			}
+			result |= ((u_int32_t)byte_val) << (8 * i);
+		}
+	}
+	return result;
 }
 
+// part 1
 int L1lookup(u_int32_t address){
 	unsigned int set = getL1SetID(address)
 	u_int32_t tag = getL1Tag(address);
@@ -84,12 +105,36 @@ unsigned int getL2Tag(u_int32_t address){
 	return address >> 6;
 }
 
-
-void write(u_int32_t address, u_int32_t data)
-{
-///// REPLACE THIS /////
+// part 3
+void write(u_int32_t address, u_int32_t data){
+	int i;
+	for (i = 0; i < 4; i ++){
+		u_int32_t current_addr = address +i;
+		unsigned char byte_val = (data >> (8 * i)) & 0xFF;
+		if (current_addr < DRAM_SIZE){
+			DRAM[current_addr] = byte_val;
+		}
+		unsigned int l1_set = getL1SetID(current_addr);
+		unsigned int l1_tag = getL1Tag(current_addr);
+		unsigned int offset = current_addr & 0xF;
+		int w;
+		for (w = 0; w < 2; w++){
+			if (L1_cache[l1_set][w].valid && L1_cache[l1_set][w].tag == l1_tag){
+				L1_cache[l1_set][w].data[offset] = byte_val;
+				break;
+			}
+		}
+		unsigned int l2_set = getL2SetID(current_addr);
+		unsigned int l2_tag = getL2Tag(current_addr);
+		for (w = 0; w < 4; w++){
+			if(L2_cache[l2_set][w].valid && L2_cache[l2_set][w].tag == l2_tag){
+				L2_cache[l2_set][w].data[offset] = byte_val;
+				break;
+			}
+		}
+	} 
 	read_fifo(address);
-return;
+	return;
 }
 
 
