@@ -42,46 +42,46 @@ void printCache()
 	}
 }
 
-u_int32_t read_fifo(u_int32_t address)
-{
-///// IMPLEMENT THIS /////
-return 0;
+u_int32_t read_fifo(u_int32_t address){
+	return 0;
 }
 
-int L1lookup(u_int32_t address)
-{
-///// IMPLEMENT THIS /////
-return 0;
+int L1lookup(u_int32_t address){
+	unsigned int set = getL1SetID(address)
+	u_int32_t tag = getL1Tag(address);
+	for (int way = 0; way < 2; way ++){
+		if (L1_cache[set][way].timeStamp != 0 && L1_cache[set][way].tag == tag){
+			return 1;
+		}
+	}
+	return 0;
 }
 
-int L2lookup(u_int32_t address)
-{
-///// IMPLEMENT THIS /////
-return 0;
+int L2lookup(u_int32_t address){
+	unsigned int set = getL2SetID(address)
+	u_int32_t tag = getL2Tag(address);
+	for (int way = 0; way < 4; way ++){
+		if (L2_cache[set][way].timeStamp != 0 && L2_cache[set][way].tag == tag){
+			return 1;
+		}
+	}
+	return 0;
 }
 
-unsigned int getL1SetID(u_int32_t address)
-{
-///// IMPLEMENT THIS /////
-return 0;
+unsigned int getL1SetID(u_int32_t address){
+	return (address >> 4) & 0x1;
 }
 
-unsigned int getL2SetID(u_int32_t address)
-{
-///// IMPLEMENT THIS /////
-return 0;
+unsigned int getL1Tag(u_int32_t address){
+	return address >> 5;
 }
 
-unsigned int getL1Tag(u_int32_t address)
-{
-///// IMPLEMENT THIS /////
-return 0;
+unsigned int getL2SetID(u_int32_t address){
+	return (address >> 4) & 0x3;
 }
 
-unsigned int getL2Tag(u_int32_t address)
-{
-///// IMPLEMENT THIS /////
-return 0;
+unsigned int getL2Tag(u_int32_t address){
+	return address >> 6;
 }
 
 
